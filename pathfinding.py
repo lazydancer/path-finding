@@ -19,8 +19,8 @@ def color(board, state):
     # Inputs the board and the state and ouputs an narray of colours
     _COLORS = {
         PathState.FOUND: (25/255, 170/255, 188/255),
-        PathState.REVIEWED: (30/255, 201/255, 223/255),
-        PathState.QUEUED: (60/255, 255/255, 255/255),
+        PathState.REVIEWED: (120/255, 224/255, 237/255),
+        PathState.QUEUED: (210/255, 245/255, 249/255),
         PathState.NOTHING: (1,1,1), #White
         'Wall': (35/255, 35/255, 35/255),
         'Start': (25/255, 170/255, 188/255),
@@ -42,10 +42,11 @@ class Solver:
         self._board = board
         
         # State Variables
+        self.solution_found = False
         self._visited = set()
-        self._queue = set()
-        self._queue.add(self._board.start)
-        self._state = np.empty([3, 3])
+        self._queue = []
+        self._queue.append((self._board.start, [self._board.start]))
+        self._state = np.empty([5, 5])
         self._state.fill(PathState.NOTHING)
         
     def _add_neighbours(self, pos):
@@ -54,10 +55,10 @@ class Solver:
         directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
         for dir in directions:
             new_x = pos[0] + dir[0]
-            if new_x < 0 or new_x > 2:
+            if new_x < 0 or new_x >= 5:
                 continue
             new_y = pos[1] + dir[1]
-            if new_y < 0 or new_y > 2:
+            if new_y < 0 or new_y >= 5:
                 continue
             
             new_pos = (new_x, new_y)
@@ -73,23 +74,31 @@ class Solver:
         return result
 
     def step(self):
-        self._calculation()
-        self._updateState()
+
+        if not self.solution_found:
+            result = self._calculation()
+
+            if result is not None:
+                self._update_path(result)
+                self.solution_found = True
+            else:
+                self._updateState()
 
         return self._state
 
     def _calculation(self):
-        next_queue = set()
+        next_queue = []
 
-        for pos in self._queue:
+        while self._queue:
+            vertex, path = self._queue.pop(0)
+            self._visited.add(vertex)       
 
-            if pos == self._board.end:
-                print("Party")
-            
-            self._visited.add(pos)
-
-            for n in self._add_neighbours(pos):
-                next_queue.add(n)
+            for node in self._add_neighbours(vertex):
+                if node == self._board.end:
+                    return path + [self._board.end]
+                else:
+                    self._visited.add(node)
+                    next_queue.append((node, path + [node]))
         
         self._queue = next_queue
 
@@ -97,12 +106,17 @@ class Solver:
         for v in self._visited:
             self._state[v[1], v[0]] = PathState.REVIEWED        
         for q in self._queue:
-            self._state[q[1], q[0]] = PathState.QUEUED
-       
+            self._state[q[0][1], q[0][0]] = PathState.QUEUED
+    
+    def _update_path(self, path):
+        for v in path:
+            self._state[v[1], v[0]] = PathState.FOUND
+
+
 class Grapher:
     def __init__(self, board, solver_class):
         self.fig = plt.figure()
-        self.im = plt.imshow(np.random.random((3,3)), interpolation='none')
+        self.im = plt.imshow(np.random.random((5,5)), interpolation='none')
         self._board = board
         self._solver_class = solver_class
 
@@ -121,20 +135,29 @@ class Grapher:
         
         return [self.im]
 
+    def isComplete(self):
+        return not self.solver.solution_found
+
 
 if __name__ == '__main__':
     board = Board(
-        walls = [(1, 1)],
+        walls = [(1, 1), (1, 2)],
         start = (0, 1),
         end   = (2, 1)
     )
 
     graph = Grapher(board, Solver)
 
+    def gen():
+        i = 0
+        while graph.isComplete():
+            i += 1
+            yield i
+
     anim = FuncAnimation(
         graph.fig, 
         graph.update, 
-        frames=5,
+        frames=gen,
         init_func=graph.init,
         blit=True,
         interval=1000
