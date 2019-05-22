@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 # Create a board type to seperate the const board to the changing state of the solver function
-Board = namedtuple('Board', 'walls, start, end')
+Board = namedtuple('Board', 'size, walls, start, end')
 
 # Enum
 class PathState:
@@ -46,7 +46,7 @@ class Solver:
         self._visited = set()
         self._queue = []
         self._queue.append((self._board.start, [self._board.start]))
-        self._state = np.empty([5, 5])
+        self._state = np.empty(board.size)
         self._state.fill(PathState.NOTHING)
         
     def _add_neighbours(self, pos):
@@ -55,10 +55,10 @@ class Solver:
         directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
         for dir in directions:
             new_x = pos[0] + dir[0]
-            if new_x < 0 or new_x >= 5:
+            if new_x < 0 or new_x >= self._board.size[0]:
                 continue
             new_y = pos[1] + dir[1]
-            if new_y < 0 or new_y >= 5:
+            if new_y < 0 or new_y >= self._board.size[1]:
                 continue
             
             new_pos = (new_x, new_y)
@@ -116,7 +116,7 @@ class Solver:
 class Grapher:
     def __init__(self, board, solver_class):
         self.fig = plt.figure()
-        self.im = plt.imshow(np.random.random((5,5)), interpolation='none')
+        self.im = plt.imshow(np.random.random(board.size), interpolation='none')
         self._board = board
         self._solver_class = solver_class
 
@@ -141,9 +141,10 @@ class Grapher:
 
 if __name__ == '__main__':
     board = Board(
+        size = (50, 50),
         walls = [(1, 1), (1, 2)],
         start = (0, 1),
-        end   = (2, 1)
+        end   = (49, 41)
     )
 
     graph = Grapher(board, Solver)
@@ -160,7 +161,7 @@ if __name__ == '__main__':
         frames=gen,
         init_func=graph.init,
         blit=True,
-        interval=1000
+        interval=100
     )
     if len(sys.argv) > 1 and sys.argv[1] == 'save':
         anim.save('dist/line.gif', dpi=80, writer='imagemagick')
