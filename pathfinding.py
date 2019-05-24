@@ -55,7 +55,7 @@ class Grapher:
         return [self.im]
 
     def isComplete(self):
-        return not self.solver.solution_found
+        return self.solver.isComplete()
 
 
 if __name__ == '__main__':
@@ -70,7 +70,7 @@ if __name__ == '__main__':
 
     def gen():
         i = 0
-        while graph.isComplete():
+        while not graph.isComplete():
             i += 1
             yield i
 
