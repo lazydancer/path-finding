@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-from solvers import BreathFirst
+from solvers import BreathFirst, DepthFirst
 from pathState import PathState
 
 # Create a board type to seperate the const board to the changing state of the solver function
@@ -33,11 +33,14 @@ def color(board, state):
     
 
 class Grapher:
+    
+
     def __init__(self, board, solver_class):
         self.fig = plt.figure()
         self.im = plt.imshow(np.random.random(board.size), interpolation='none')
         self._board = board
         self._solver_class = solver_class
+        self._Found_countdown = 50
 
     # initialization function: plot the background of each frame
     def init(self):
@@ -55,7 +58,13 @@ class Grapher:
         return [self.im]
 
     def isComplete(self):
-        return self.solver.isComplete()
+        if self.solver.isComplete():
+            if self._Found_countdown == 0:
+                return True
+            self._Found_countdown -= 1
+        return False
+
+        #return self.solver.isComplete()
 
 
 if __name__ == '__main__':
@@ -66,7 +75,7 @@ if __name__ == '__main__':
         end   = (49, 41)
     )
 
-    graph = Grapher(board, BreathFirst)
+    graph = Grapher(board, DepthFirst)
 
     def gen():
         i = 0
@@ -80,7 +89,7 @@ if __name__ == '__main__':
         frames=gen,
         init_func=graph.init,
         blit=True,
-        interval=100
+        interval=10
     )
     if len(sys.argv) > 1 and sys.argv[1] == 'save':
         anim.save('dist/line.gif', dpi=80, writer='imagemagick')

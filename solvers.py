@@ -70,3 +70,70 @@ class BreathFirst:
             result.append(new_pos)
 
         return result
+
+class DepthFirst:
+    def __init__(self, board):
+        # Constants for an object
+        self._board = board
+        
+        # State Variables
+        self._visited = set()
+        self._stack = [(self._board.start, [self._board.start])]
+        self._state = np.full(board.size, PathState.NOTHING)
+        self._solution_path = []
+
+    def step(self):
+        if self._solution_path != []:
+            return self._state
+        
+        self._calculation()
+        self._updateState()
+
+        return self._state
+
+    def isComplete(self):
+        return self._solution_path != []
+
+    def _calculation(self):
+        (vertex, path) = self._stack.pop()
+
+        if vertex not in self._visited:
+            self._visited.add(vertex)
+
+            for neighbour in self._add_neighbours(vertex):
+                if neighbour == self._board.end:
+                    self._solution_path = path
+                else:
+                    self._stack.append((neighbour, path + [neighbour]))
+
+
+    def _updateState(self):
+        
+        for v in self._stack:
+            self._state[v[0][1], v[0][0]] = PathState.QUEUED
+        for v in self._visited:
+            self._state[v[1], v[0]] = PathState.REVIEWED        
+        for v in self._solution_path:
+            self._state[v[1], v[0]] = PathState.FOUND
+    
+    def _add_neighbours(self, pos):
+        result = set()
+        
+        directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+        for dir in directions:
+            new_pos = (pos[0] + dir[0], pos[1] + dir[1])
+
+            if new_pos[0] < 0 or new_pos[0] >= self._board.size[0]:
+                continue
+            if new_pos[1] < 0 or new_pos[1] >= self._board.size[1]:
+                continue
+            
+            if new_pos in self._visited:
+                continue
+
+            if new_pos in self._board.walls:
+                continue
+            
+            result.add(new_pos)
+
+        return result
