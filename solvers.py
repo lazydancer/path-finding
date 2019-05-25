@@ -4,10 +4,10 @@ import numpy as np
 
 class BreathFirst:
     def __init__(self, board):
-        # Constants for an object
+        # Constants
         self._board = board
         
-        # State Variables
+        # Variables
         self._visited = set()
         self._queue = [(self._board.start, [self._board.start])]
         self._state = np.full(board.size, PathState.NOTHING)
@@ -50,33 +50,27 @@ class BreathFirst:
             self._state[v[1], v[0]] = PathState.FOUND
     
     def _add_neighbours(self, pos):
-        result = []
+        (x, y) = pos
+        results = [(x+1, y), (x, y-1), (x-1, y), (x, y+1)]
         
-        directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
-        for dir in directions:
-            new_pos = (pos[0] + dir[0], pos[1] + dir[1])
+        results = filter(self._in_bounds, results)
+        results = filter(self._passable, results)
+ 
+        return results
 
-            if new_pos[0] < 0 or new_pos[0] >= self._board.size[0]:
-                continue
-            if new_pos[1] < 0 or new_pos[1] >= self._board.size[1]:
-                continue
-            
-            if new_pos in self._visited:
-                continue
+    def _in_bounds(self, id):
+        (x, y) = id
+        return 0 <= x < self._board.size[0] and 0 <= y < self._board.size[1]
 
-            if new_pos in self._board.walls:
-                continue
-            
-            result.append(new_pos)
-
-        return result
+    def _passable(self, id):
+        return id not in self._visited and id not in self._board.walls
 
 class DepthFirst:
     def __init__(self, board):
-        # Constants for an object
+        # Constants
         self._board = board
         
-        # State Variables
+        # Variables
         self._visited = set()
         self._stack = [(self._board.start, [self._board.start])]
         self._state = np.full(board.size, PathState.NOTHING)
@@ -106,34 +100,26 @@ class DepthFirst:
                 else:
                     self._stack.append((neighbour, path + [neighbour]))
 
-
     def _updateState(self):
-        
         for v in self._stack:
             self._state[v[0][1], v[0][0]] = PathState.QUEUED
         for v in self._visited:
             self._state[v[1], v[0]] = PathState.REVIEWED        
         for v in self._solution_path:
             self._state[v[1], v[0]] = PathState.FOUND
-    
+
     def _add_neighbours(self, pos):
-        result = set()
+        (x, y) = pos
+        results = [(x+1, y), (x, y-1), (x-1, y), (x, y+1)]
         
-        directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
-        for dir in directions:
-            new_pos = (pos[0] + dir[0], pos[1] + dir[1])
+        results = filter(self._in_bounds, results)
+        results = filter(self._passable, results)
+ 
+        return results
 
-            if new_pos[0] < 0 or new_pos[0] >= self._board.size[0]:
-                continue
-            if new_pos[1] < 0 or new_pos[1] >= self._board.size[1]:
-                continue
-            
-            if new_pos in self._visited:
-                continue
+    def _in_bounds(self, id):
+        (x, y) = id
+        return 0 <= x < self._board.size[0] and 0 <= y < self._board.size[1]
 
-            if new_pos in self._board.walls:
-                continue
-            
-            result.add(new_pos)
-
-        return result
+    def _passable(self, id):
+        return id not in self._visited and id not in self._board.walls
