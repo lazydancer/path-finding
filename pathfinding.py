@@ -33,39 +33,30 @@ def color(board, state):
     
 
 class Grapher:
-    
 
     def __init__(self, board, solver_class):
         self.fig = plt.figure()
         self.im = plt.imshow(np.random.random(board.size), interpolation='none')
-        self._board = board
-        self._solver_class = solver_class
-        self._Found_countdown = 50
+        self.board = board
+        self.solver_class = solver_class
 
     # initialization function: plot the background of each frame
     def init(self):
-        self.solver = self._solver_class(self._board)
-        x = color(self._board, self.solver.step())
+        self.solver = self.solver_class(self.board)
+        x = color(self.board, self.solver.step())
         self.im.set_data(x)
         
         return [self.im]
 
     # animation function.  This is called sequentially
     def update(self, _frame_num):
-        x = color(self._board, self.solver.step())
+        x = color(self.board, self.solver.step())
         self.im.set_data(x)
         
         return [self.im]
 
     def isComplete(self):
-        if self.solver.isComplete():
-            if self._Found_countdown == 0:
-                return True
-            self._Found_countdown -= 1
-        return False
-
-        #return self.solver.isComplete()
-
+        return self.solver.isComplete()
 
 if __name__ == '__main__':
     board = Board(
@@ -75,7 +66,7 @@ if __name__ == '__main__':
         end   = (49, 41)
     )
 
-    graph = Grapher(board, DepthFirst)
+    graph = Grapher(board, BreathFirst)
 
     def gen():
         i = 0
@@ -86,12 +77,14 @@ if __name__ == '__main__':
     anim = FuncAnimation(
         graph.fig, 
         graph.update, 
-        frames=gen,
+        frames=200,
         init_func=graph.init,
         blit=True,
-        interval=10
+        interval=16,
+        repeat_delay=200,
     )
+
     if len(sys.argv) > 1 and sys.argv[1] == 'save':
-        anim.save('dist/line.gif', dpi=80, writer='imagemagick')
+        anim.save('dist/line.gif', dpi=80, writer='imagemagick') # progress_callback=lambda i, n: print(f'Saving frame {i} of {n}')
     else:
         plt.show() # will just loop the animation forever.
