@@ -35,23 +35,22 @@ def color(board, state):
 class Grapher:
 
     def __init__(self, board, solver_class):
-        self.fig = plt.figure()
-        self.im = plt.imshow(np.random.random(board.size), interpolation='none')
         self.board = board
         self.solver_class = solver_class
 
-    # initialization function: plot the background of each frame
-    def init(self):
-        self.solver = self.solver_class(self.board)
-        x = color(self.board, self.solver.step())
-        self.im.set_data(x)
+        self.fig = plt.figure()
+        self.im = plt.imshow(np.random.random(board.size), interpolation='none')
         
-        return [self.im]
+
+    # initialization function: plot the background of each frame
+    def init_solver(self):
+        self.solver = self.solver_class(self.board)
+        return self.update(0)
 
     # animation function.  This is called sequentially
     def update(self, _frame_num):
-        x = color(self.board, self.solver.step())
-        self.im.set_data(x)
+        colored_board = color(self.board, self.solver.step())
+        self.im.set_data(colored_board)
         
         return [self.im]
 
@@ -68,23 +67,22 @@ if __name__ == '__main__':
 
     graph = Grapher(board, BreathFirst)
 
-    def gen():
-        i = 0
-        while not graph.isComplete():
-            i += 1
-            yield i
-
     anim = FuncAnimation(
         graph.fig, 
         graph.update, 
-        frames=200,
-        init_func=graph.init,
+        frames=2000,
+        init_func=graph.init_solver,
         blit=True,
         interval=16,
         repeat_delay=200,
     )
 
     if len(sys.argv) > 1 and sys.argv[1] == 'save':
-        anim.save('dist/line.gif', dpi=80, writer='imagemagick') # progress_callback=lambda i, n: print(f'Saving frame {i} of {n}')
+        #anim.save('dist/line.gif', dpi=100, writer='imagemagick', progress_callback=lambda i, n: print(f'Saving frame {i} of {n}'))
+        anim.save('dist/line.mkv', 
+            codec='vp8', # used instead of h264 
+            extra_args=["-auto-alt-ref", "0"], #Error if not used with vp8
+            progress_callback=lambda i, n: print(f'Saving frame {i} of {n}')
+        )
     else:
         plt.show() # will just loop the animation forever.
