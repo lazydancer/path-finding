@@ -65,12 +65,12 @@ if __name__ == '__main__':
         end   = (29, 15)
     )
 
-    graph = Grapher(board, Dijkstra)
+    graph = Grapher(board, AStar)
 
     anim = FuncAnimation(
         graph.fig, 
         graph.update, 
-        frames=2000,
+        frames=1000,
         init_func=graph.init_solver,
         blit=True,
         interval=16,
@@ -79,7 +79,7 @@ if __name__ == '__main__':
 
     if len(sys.argv) > 1 and sys.argv[1] == 'save':
         #anim.save('dist/line.gif', dpi=100, writer='imagemagick', progress_callback=lambda i, n: print(f'Saving frame {i} of {n}'))
-        anim.save('dist/line.mkv', 
+        anim.save('dist/line.webm', 
             codec='vp8', # used instead of h264 
             extra_args=["-auto-alt-ref", "0"], #Error if not used with vp8
             progress_callback=lambda i, n: print(f'Saving frame {i} of {n}')

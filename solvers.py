@@ -301,7 +301,7 @@ class AStar:
                 if neighbour == self.board.end:
                     self.solution_path = path
                 else:
-                    self.stack.append((neighbour, path + [neighbour], prev_weight + self._added_weight(neighbour) ))
+                    self.stack.append((neighbour, path + [neighbour], prev_weight + 1.3))
 
     def _added_weight(self, pos):
         target = self.board.end
@@ -324,7 +324,7 @@ class AStar:
         results = filter(self._passable, results)
  
         results = list(results)
-        random.shuffle(results)
+        #random.shuffle(results)
 
         return results
 
