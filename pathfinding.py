@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-from solvers import BreathFirst, DepthFirst
+from solvers import BreathFirst, DepthFirst, Dijkstra, BestFirst, AStar
 from pathState import PathState
 
 # Create a board type to seperate the const board to the changing state of the solver function
@@ -59,13 +59,13 @@ class Grapher:
 
 if __name__ == '__main__':
     board = Board(
-        size = (50, 50),
-        walls = [(1, 1), (1, 2)],
-        start = (0, 1),
-        end   = (49, 41)
+        size = (30, 30),
+        walls = [(10, 10), (11, 10), (12, 10), (13, 10), (14, 10), (15, 10), (16, 10), (17, 10), (17, 11), (17, 12), (17, 13), (17, 14), (17, 15), (17, 16), (17, 17), (17, 18), (17, 19), (17, 20), (16, 20), (15, 20), (14, 20), (13, 20), (12, 20), (11, 20), (10, 20)],
+        start = (1, 15),
+        end   = (29, 15)
     )
 
-    graph = Grapher(board, BreathFirst)
+    graph = Grapher(board, Dijkstra)
 
     anim = FuncAnimation(
         graph.fig, 
